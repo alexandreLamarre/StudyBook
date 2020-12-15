@@ -6,7 +6,7 @@ class Editor extends React.Component{
   constructor(props){
     super(props);
     this.state = {
-
+      current_id : 1,
     };
   }
 
@@ -18,14 +18,36 @@ class Editor extends React.Component{
 
   }
 
+  addCell(e){
+    e.preventDefault();
+    var new_node = document.createElement("div");
+    const new_id = "editorContent"+this.state.current_id.toString();
+    this.setState({current_id: this.state.current_id+1})
+    new_node.setAttribute("id", new_id);
+    new_node.className = "editorcontent";
+    new_node.setAttribute("contentEditable", "true");
+    console.log(new_node);
+    var el = document.getElementById("editorContainer");
+    el.appendChild(new_node)
+  }
+
   render(){
     return (
       <div>
         <Toolbar />
-        <div id = "editorContent"
-        style = {{height: this.props.height*0.85}}
-        contentEditable='true'>
+        <div id = "editorContainer">
+            <div className = "editorcontent"
+            id = "editorContent0"
+            contentEditable='true'>
+            </div>
         </div>
+        <button
+        className = "cellButton"
+        onClick = {(e) => this.addCell(e)}
+        onMouseDown = {(e) => e.preventDefault()}
+        >
+          Add a new cell
+        </button>
       </div>
     )
   }
