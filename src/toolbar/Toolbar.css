@@ -1,0 +1,23 @@
+.toolbar{
+  margin-top: 3%;
+  margin-left: 3%;
+
+}
+.tool-list{
+  display: flex;
+  flex-flow: row nowrap;
+  list-style: none;
+  padding: 0;
+  margin: 1px;
+  overflow: hidden;
+}
+
+.tool{
+
+}
+
+.tool--btn{
+  display:block;
+  padding: .5rem;
+  font-size: 20px;
+}

@@ -1,11 +1,14 @@
 import logo from './logo.svg';
 import './App.css';
+import Editor from "./editor/Editor.js";
 import React from "react";
 
 
 function App() {
   return (
     <div className="App">
+      <Editor/>
+      {/*
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
@@ -20,6 +23,7 @@ function App() {
           Learn React
         </a>
       </header>
+      */}
     </div>
   );
 }
