@@ -7,7 +7,7 @@ import React from "react";
 function App() {
   return (
     <div className="App">
-      <Editor/>
+      <Editor height={window.innerHeight}/>
       {/*
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />

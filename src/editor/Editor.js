@@ -21,8 +21,9 @@ class Editor extends React.Component{
   render(){
     return (
       <div>
-        <Toolbar/>
+        <Toolbar />
         <div id = "editorContent"
+        style = {{height: this.props.height*0.85}}
         contentEditable='true'>
         </div>
       </div>

@@ -5,20 +5,20 @@ class Toolbar extends React.Component{
   constructor(props){
     super(props);
     this.state = {
-
     };
   }
 
   componentDidMount(){
-
+    this.setState({height: window.innerHeight});
   }
 
   componentDidUpdate(){
 
   }
 
-  runcommand(cmd){
-    document.execCommand(cmd, false, null)
+  runcommand(e,cmd){
+    e.preventDefault();
+    document.execCommand(cmd, false, null);
   }
 
 
@@ -28,10 +28,11 @@ class Toolbar extends React.Component{
         <ul className = "tool-list">
           <li className = "tool">
           <button
+              onMouseDown = {(e) => e.preventDefault()}
               type="button"
               data-command='justifyLeft'
               className="tool--btn"
-              onClick = {(e) => this.runcommand('justifyLeft')}>
+              onClick = {(e) => this.runcommand(e,'justifyLeft')}>
               Justify Left
           </button>
           </li>
@@ -40,7 +41,8 @@ class Toolbar extends React.Component{
 				    type="button"
 				    data-command='justifyCenter'
 				    className="tool--btn"
-            onClick = {(e) => this.runcommand('justifyCenter')}>
+            onClick = {(e) => this.runcommand(e,'justifyCenter')}
+            onMouseDown = {(e) => e.preventDefault()}>
             Justify Center
 			     </button>
 		      </li>
@@ -50,7 +52,8 @@ class Toolbar extends React.Component{
 				    type="button"
 				    data-command='justifyRight'
 				    className="tool--btn"
-            onClick = {(e) => this.runcommand('justifyRight')}>
+            onClick = {(e) => this.runcommand(e,'justifyRight')}
+            onMouseDown = {(e) => e.preventDefault()}>
             Justify Right
 			     </button>
 		      </li>
@@ -60,7 +63,8 @@ class Toolbar extends React.Component{
             type = "button"
             data-command = "bold"
             className = "tool--btn"
-            onClick = {(e) => this.runcommand('bold')}>
+            onClick = {(e) => this.runcommand(e,'bold')}
+            onMouseDown = {(e) => e.preventDefault()}>
             Bold
             </button>
           </li>
@@ -70,7 +74,8 @@ class Toolbar extends React.Component{
             type = "button"
             data-command = "italic"
             className = "tool--btn"
-            onClick = {(e) => this.runcommand('italic')}>
+            onClick = {(e) => this.runcommand(e,'italic')}
+            onMouseDown = {(e) => e.preventDefault()}>
             Italic
             </button>
           </li>
@@ -80,7 +85,8 @@ class Toolbar extends React.Component{
             type = "button"
             data-command = "underline"
             className = "tool--btn"
-            onClick = {(e) => this.runcommand('underline')}>
+            onClick = {(e) => this.runcommand(e,'underline')}
+            onMouseDown = {(e) => e.preventDefault()}>
             Underline
             </button>
           </li>
@@ -89,7 +95,8 @@ class Toolbar extends React.Component{
             type = "button"
             data-command = "insertOrderedList"
             className = "tool--btn"
-            onClick = {(e) => this.runcommand("insertOrderedList")}>
+            onClick = {(e) => this.runcommand(e,"insertOrderedList")}
+            onMouseDown = {(e) => e.preventDefault()}>
             Insert ordered list
             </button>
           </li>
@@ -98,7 +105,8 @@ class Toolbar extends React.Component{
             type = "button"
             data-command = "insertUnorderedList"
             className = "tool--btn"
-            onClick = {(e) => this.runcommand("insertUnorderedList")}>
+            onClick = {(e) => this.runcommand(e,"insertUnorderedList")}
+            onMouseDown = {(e) => e.preventDefault()}>
             insertUnorderedList
             </button>
           </li>
