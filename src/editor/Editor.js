@@ -86,10 +86,18 @@ class Editor extends React.Component{
     const cid = this.state.current_id.toString();
     var id = "editorContent" + cid;
     var node = document.getElementById(id);
+    if(node === null || node === undefined){
+      console.log("text match error");
+      return;
+    }
     const [exact_match, interpreted_match] = this.getLastWord(node.innerText);
-    if(interpreted_match === undefined || exact_match === undefined) console.log("undefined behaviour for word match event");
+    if(interpreted_match === null || exact_match === null || interpreted_match == undefined || exact_match === undefined) console.log("undefined behaviour for word match event");
     else {
       console.log("word", interpreted_match);
+      console.log("starts with space", !(isLetter(interpreted_match.charAt(0))) );
+      for(var i = 0; i < interpreted_match.length; i++){
+        console.log(interpreted_match[i]);
+      }
       console.log("is word === integral?", interpreted_match === "integral");
       if(interpreted_match == "integral"){
         console.log("matched to existing command")
@@ -103,10 +111,10 @@ class Editor extends React.Component{
   getLastWord(full_text){
     var last_index = full_text.length -1;
     for(var i = last_index; i >= 0; i--){
-      if(full_text[i] === " " || last_index - i > COMMAND_LIMIT || i === 0){
+      if(full_text[i-1] === " " || last_index - i > COMMAND_LIMIT || i === 0){
         const exact_match = full_text.slice(i, last_index);
         console.log("exact_match", exact_match);
-        var interpreted_match = exact_match.replace(" ", "");
+        var interpreted_match = exact_match.replace(/[\W_]+/g, "");
         return [exact_match, interpreted_match];
       }
     }
@@ -127,7 +135,7 @@ class Editor extends React.Component{
         id = "editorContainer"
         onKeyDown = {(e) => this.handleKeyDown(e)}
         onKeyUp = {(e) => this.handleKeyUp(e)}>
-            <div className = "editorcontent"
+            <div className = "editorcontent" align = "justifyLeft"
             onInput = {(e) => this.matchWordEvent()}
             id = "editorContent0"
             contentEditable='true'
@@ -147,12 +155,19 @@ class Editor extends React.Component{
         >
           Math Keyboard
         </button>
+        <input type = "text" list = "commands"/>
         <datalist id = "commands">
-          <option value = "integral"> <span> &#8747; </span> </option>
+          <option value = "indefinite integral"> &#8747; </option>
+          <option value = "definite integral"> &#8747; &sub3 &sup; &#78; </option>
         </datalist>
+
       </div>
     )
   }
 }
 
 export default Editor;
+
+function isLetter(str) {
+  return str.length === 1 && str.match(/[a-z]/i);
+}
