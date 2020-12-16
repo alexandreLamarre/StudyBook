@@ -11,6 +11,7 @@ class Editor extends React.Component{
     this.state = {
       new_id: 1,
       current_id : 0,
+      prevCaretPos: 0,
       deleteCellKeys: {16: false, 8: false},
     };
   }
@@ -36,17 +37,19 @@ class Editor extends React.Component{
     new_node.oninput = () => this.matchWordEvent();
     console.log(new_node);
     var el = document.getElementById("editorContainer");
-
-
-    var input_element = document.createElement("input");
-    input_element.setAttribute("list", "commands");
-    input_element.setAttribute("type", "text");
-    new_node.innerHTML = input_element;
     el.appendChild(new_node);
   }
 
   setID(id){
     console.log(id);
+    var el = document.getElementById(id);
+    el.focus();
+    var sel = document.getSelection();
+    var range = document.createRange();
+    range.setStart(el, 0);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
     this.setState({current_id: id.slice(-1)});
   }
 
@@ -86,12 +89,15 @@ class Editor extends React.Component{
     const cid = this.state.current_id.toString();
     var id = "editorContent" + cid;
     var node = document.getElementById(id);
+    var sel = window.getSelection();
+    const caretPos = sel.anchorOffset;
+    console.log("offset", sel.anchorOffset);
     if(node === null || node === undefined){
       console.log("text match error");
       return;
     }
     const [exact_match, interpreted_match] = this.getLastWord(node.innerText);
-    if(interpreted_match === null || exact_match === null || interpreted_match == undefined || exact_match === undefined) console.log("undefined behaviour for word match event");
+    if(interpreted_match === null || exact_match === null || interpreted_match === undefined || exact_match === undefined) console.log("undefined behaviour for word match event");
     else {
       console.log("word", interpreted_match);
       console.log("starts with space", !(isLetter(interpreted_match.charAt(0))) );
@@ -99,13 +105,22 @@ class Editor extends React.Component{
         console.log(interpreted_match[i]);
       }
       console.log("is word === integral?", interpreted_match === "integral");
-      if(interpreted_match == "integral"){
+      if(interpreted_match === "integral"){
         console.log("matched to existing command")
         document.getElementById(id).innerHTML
-      = node.innerHTML.replace("integral", '<span contentEditable = "false" id = "'+ cid +'"> &#8747; <input id = "formula'+ cid + '" + type = "text"/> </span>')
+      = node.innerHTML.replace("integral", '<span contentEditable = "false" id = "symbol'+ cid +'"> &#8747; <div id = "formula'+ cid + '" contentEditable = "true"/> </span>')
+      var range = document.createRange();
+      var formulaToFocus = document.getElementById("formula" + cid);
+      formulaToFocus.focus();
+      formulaToFocus.addEventListener("onkeypress", this.handleFormulaKey, false);
+
+      this.setState({prevCaretPos: caretPos+1});
       }
     };
+  }
 
+  handleFormulaKey(e){
+    console.log("key pressed inside formula");
   }
 
   getLastWord(full_text){
