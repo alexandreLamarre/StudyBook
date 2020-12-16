@@ -18,3 +18,11 @@
   margin-right: auto;
   margin-bottom: 5%;
 }
+
+[id^="formula"]{
+  font-style: italic;
+  border-style: dotted;
+  outline: none;
+  size : 10;
+  resize: horizontal;
+}

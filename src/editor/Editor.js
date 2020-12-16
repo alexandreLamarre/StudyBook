@@ -33,12 +33,20 @@ class Editor extends React.Component{
     new_node.className = "editorcontent";
     new_node.setAttribute("contentEditable", "true");
     new_node.onclick = () => this.setID(new_node.id);
+    new_node.oninput = () => this.matchWordEvent();
     console.log(new_node);
     var el = document.getElementById("editorContainer");
-    el.appendChild(new_node)
+
+
+    var input_element = document.createElement("input");
+    input_element.setAttribute("list", "commands");
+    input_element.setAttribute("type", "text");
+    new_node.innerHTML = input_element;
+    el.appendChild(new_node);
   }
 
   setID(id){
+    console.log(id);
     this.setState({current_id: id.slice(-1)});
   }
 
@@ -74,16 +82,19 @@ class Editor extends React.Component{
                                                         8: false}});
   }
 
-  matchWordEvent(e){
-    var id = "editorContent" + this.state.current_id.toString();
+  matchWordEvent(){
+    const cid = this.state.current_id.toString();
+    var id = "editorContent" + cid;
     var node = document.getElementById(id);
-    var [exact_match, interpreted_match] = this.getLastWord(node.innerHTML);
+    const [exact_match, interpreted_match] = this.getLastWord(node.innerText);
     if(interpreted_match === undefined || exact_match === undefined) console.log("undefined behaviour for word match event");
     else {
-      console.log("word:",interpreted_match);
-      if(interpreted_match === "integral"){
+      console.log("word", interpreted_match);
+      console.log("is word === integral?", interpreted_match === "integral");
+      if(interpreted_match == "integral"){
         console.log("matched to existing command")
-        document.getElementById(id).innerHTML= node.innerHTML.replace("integral", '<span> &#8747; </span>')
+        document.getElementById(id).innerHTML
+      = node.innerHTML.replace("integral", '<span contentEditable = "false" id = "'+ cid +'"> &#8747; <input id = "formula'+ cid + '" + type = "text"/> </span>')
       }
     };
 
@@ -91,12 +102,11 @@ class Editor extends React.Component{
 
   getLastWord(full_text){
     var last_index = full_text.length -1;
-    for(var i = last_index; i > 0; i--){
+    for(var i = last_index; i >= 0; i--){
       if(full_text[i] === " " || last_index - i > COMMAND_LIMIT || i === 0){
         const exact_match = full_text.slice(i, last_index);
+        console.log("exact_match", exact_match);
         var interpreted_match = exact_match.replace(" ", "");
-        interpreted_match = interpreted_match.replace("&nbsp", "");
-        console.log(interpreted_match);
         return [exact_match, interpreted_match];
       }
     }
@@ -111,21 +121,20 @@ class Editor extends React.Component{
       <div>
         <Toolbar />
 
-        <div>
+
         <div
         className = "editorContainer"
         id = "editorContainer"
         onKeyDown = {(e) => this.handleKeyDown(e)}
         onKeyUp = {(e) => this.handleKeyUp(e)}>
             <div className = "editorcontent"
-            spellCheck = {true}
-            onInput = {(e) => this.matchWordEvent(e)}
+            onInput = {(e) => this.matchWordEvent()}
             id = "editorContent0"
             contentEditable='true'
             onClick = {(e) => this.setID(e.target.id)}>
             </div>
         </div>
-        </div>
+
         <button
         className = "cellButton"
         onClick = {(e) => this.addCell(e)}
@@ -133,6 +142,14 @@ class Editor extends React.Component{
         >
           Add a new cell
         </button>
+        <button
+        className = "cellButton"
+        >
+          Math Keyboard
+        </button>
+        <datalist id = "commands">
+          <option value = "integral"> <span> &#8747; </span> </option>
+        </datalist>
       </div>
     )
   }
