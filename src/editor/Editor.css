@@ -20,13 +20,21 @@
 }
 
 [id^="formula"]{
+  min-width: 20px;
+  pointer-events: all;
   font-style: italic;
-  border-style: dotted;
+  border-style: none;
   outline: none;
   width: auto;
   display: inline-block;
 }
 
+[id^="formula"]:focus{
+  border-style: dotted;
+}
+
 [id^="symbol"]{
+  display: inline-block;
   white-space: nowrap;
+  pointer-events: stroke;
 }

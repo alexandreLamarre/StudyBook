@@ -11,6 +11,7 @@ class Editor extends React.Component{
     this.state = {
       new_id: 1,
       current_id : 0,
+      fid: 0,
       prevCaretPos: 0,
       deleteCellKeys: {16: false, 8: false},
     };
@@ -41,15 +42,12 @@ class Editor extends React.Component{
   }
 
   setID(id){
-    console.log(id);
+    console.log("element id:",id);
+    var sel = document.getSelection();
+    console.log("collapsed?", sel.isCollapsed);
+    console.log("focusOffset:",sel.focusOffset);
     var el = document.getElementById(id);
     el.focus();
-    var sel = document.getSelection();
-    var range = document.createRange();
-    range.setStart(el, 0);
-    range.collapse(true);
-    sel.removeAllRanges();
-    sel.addRange(range);
     this.setState({current_id: id.slice(-1)});
   }
 
@@ -85,36 +83,40 @@ class Editor extends React.Component{
                                                         8: false}});
   }
 
-  matchWordEvent(){
+  matchWordEvent(e){
     const cid = this.state.current_id.toString();
-    var id = "editorContent" + cid;
-    var node = document.getElementById(id);
+    // var id = "editorContent" + cid;
+    var node = document.getElementById(e.target.id);
     var sel = window.getSelection();
-    const caretPos = sel.anchorOffset;
-    console.log("offset", sel.anchorOffset);
+    // console.log("selection", sel);
+    // console.log("id", e.target.id);
+    const caretPos = e.target.id.startsWith("formula")? sel.anchorOffset: sel.focusOffset;
+    console.log("focusoffset:", sel.focusOffset, "anchorOffset:", sel.anchorOffset);
+    console.log("offset", caretPos);
     if(node === null || node === undefined){
       console.log("text match error");
       return;
     }
-    const [exact_match, interpreted_match] = this.getLastWord(node.innerText);
+    const [exact_match, interpreted_match] = this.getLastWord(node.innerText, caretPos);
     if(interpreted_match === null || exact_match === null || interpreted_match === undefined || exact_match === undefined) console.log("undefined behaviour for word match event");
     else {
       console.log("word", interpreted_match);
       console.log("starts with space", !(isLetter(interpreted_match.charAt(0))) );
       for(var i = 0; i < interpreted_match.length; i++){
-        console.log(interpreted_match[i]);
+        console.log("char:",interpreted_match[i], "unicode:", interpreted_match.charCodeAt(i));;
       }
       console.log("is word === integral?", interpreted_match === "integral");
       if(interpreted_match === "integral"){
         console.log("matched to existing command")
-        document.getElementById(id).innerHTML
-      = node.innerHTML.replace("integral", '<span contentEditable = "false" id = "symbol'+ cid +'"> &#8747; <div id = "formula'+ cid + '" contentEditable = "true"/> </span>')
-      var range = document.createRange();
-      var formulaToFocus = document.getElementById("formula" + cid);
+        document.getElementById(e.target.id).innerHTML
+      = node.innerHTML.replace("integral", '<span contentEditable = "false" id = "symbol'+ cid +'"> &#8747; <div id = "formula'+ this.state.fid.toString()+ + cid + '" contentEditable = "true"/> </span>')
+      const new_fid = this.state.fid + 1;
+      this.setState({fid: new_fid});
+      var formulaToFocus = document.getElementById("formula" + (new_fid-1).toString()+ cid);
       formulaToFocus.focus();
       formulaToFocus.addEventListener("onkeypress", this.handleFormulaKey, false);
 
-      this.setState({prevCaretPos: caretPos+1});
+      // this.setState({prevCaretPos: caretPos+1});
       }
     };
   }
@@ -123,11 +125,16 @@ class Editor extends React.Component{
     console.log("key pressed inside formula");
   }
 
-  getLastWord(full_text){
-    var last_index = full_text.length -1;
-    for(var i = last_index; i >= 0; i--){
+  getLastWord(full_text, last_index){
+    console.log("=======================================")
+    console.log("full_text length", full_text.length,"last index", last_index);
+    for(var i = 0; i < full_text.length; i++){
+      console.log("char:", full_text[i], "unicode:", full_text.charCodeAt(i));
+    }
+    console.log("full focus text", full_text);
+    for(var i = full_text.length; i >= full_text.length - last_index; i--){
       if(full_text[i-1] === " " || last_index - i > COMMAND_LIMIT || i === 0){
-        const exact_match = full_text.slice(i, last_index);
+        const exact_match = full_text.slice(i, full_text.length);
         console.log("exact_match", exact_match);
         var interpreted_match = exact_match.replace(/[\W_]+/g, "");
         return [exact_match, interpreted_match];
@@ -151,7 +158,7 @@ class Editor extends React.Component{
         onKeyDown = {(e) => this.handleKeyDown(e)}
         onKeyUp = {(e) => this.handleKeyUp(e)}>
             <div className = "editorcontent" align = "justifyLeft"
-            onInput = {(e) => this.matchWordEvent()}
+            onInput = {(e) => this.matchWordEvent(e)}
             id = "editorContent0"
             contentEditable='true'
             onClick = {(e) => this.setID(e.target.id)}>
