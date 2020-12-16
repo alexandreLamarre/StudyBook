@@ -2,6 +2,9 @@ import React from "react";
 import Toolbar from "../toolbar/Toolbar.js";
 import "./Editor.css";
 
+const COMMAND_LIMIT = 50;
+
+
 class Editor extends React.Component{
   constructor(props){
     super(props);
@@ -36,8 +39,6 @@ class Editor extends React.Component{
   }
 
   setID(id){
-    console.log(id);
-    console.log(id.slice(-1));
     this.setState({current_id: id.slice(-1)});
   }
 
@@ -65,7 +66,6 @@ class Editor extends React.Component{
         }
   }
 
-
   handleKeyUp(e){
     if(e.keyCode === 16) this.setState({deleteCellKeys: {16:false,
                                     8: this.state.deleteCellKeys[8]}});
@@ -73,18 +73,58 @@ class Editor extends React.Component{
     if(e.keyCode === 8) this.setState({deleteCellKeys: {16: this.state.deleteCellKeys[16],
                                                         8: false}});
   }
+
+  matchWordEvent(e){
+    var id = "editorContent" + this.state.current_id.toString();
+    var node = document.getElementById(id);
+    var [exact_match, interpreted_match] = this.getLastWord(node.innerHTML);
+    if(interpreted_match === undefined || exact_match === undefined) console.log("undefined behaviour for word match event");
+    else {
+      console.log("word:",interpreted_match);
+      if(interpreted_match === "integral"){
+        console.log("matched to existing command")
+        document.getElementById(id).innerHTML= node.innerHTML.replace("integral", '<span> &#8747; </span>')
+      }
+    };
+
+  }
+
+  getLastWord(full_text){
+    var last_index = full_text.length -1;
+    for(var i = last_index; i > 0; i--){
+      if(full_text[i] === " " || last_index - i > COMMAND_LIMIT || i === 0){
+        const exact_match = full_text.slice(i, last_index);
+        var interpreted_match = exact_match.replace(" ", "");
+        interpreted_match = interpreted_match.replace("&nbsp", "");
+        console.log(interpreted_match);
+        return [exact_match, interpreted_match];
+      }
+    }
+    return full_text;
+  }
+
+
+
+
   render(){
     return (
       <div>
         <Toolbar />
-        <div id = "editorContainer"
+
+        <div>
+        <div
+        className = "editorContainer"
+        id = "editorContainer"
         onKeyDown = {(e) => this.handleKeyDown(e)}
         onKeyUp = {(e) => this.handleKeyUp(e)}>
             <div className = "editorcontent"
+            spellCheck = {true}
+            onInput = {(e) => this.matchWordEvent(e)}
             id = "editorContent0"
             contentEditable='true'
             onClick = {(e) => this.setID(e.target.id)}>
             </div>
+        </div>
         </div>
         <button
         className = "cellButton"

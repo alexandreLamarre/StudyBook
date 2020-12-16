@@ -21,6 +21,10 @@ class Toolbar extends React.Component{
     document.execCommand(cmd, false, null);
   }
 
+  runCustomCommand(e, tag){
+    e.preventDefault();
+    
+  }
 
   render(){
     return (
@@ -108,6 +112,15 @@ class Toolbar extends React.Component{
             onClick = {(e) => this.runcommand(e,"insertUnorderedList")}
             onMouseDown = {(e) => e.preventDefault()}>
             insertUnorderedList
+            </button>
+          </li>
+          <li className = "tool">
+            <button
+            onMouseDown = {(e) => e.preventDefault()}
+            type = "button"
+            className = "tool--btn"
+            onClick = {(e) => this.runCustomCommand(e, "Toolbar")}>
+            Add toolbar
             </button>
           </li>
           {/*
