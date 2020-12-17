@@ -11,11 +11,21 @@
 }
 
 .tool{
-  
+
 }
 
 .tool--btn{
   display:block;
   padding: .5rem;
   font-size: 20px;
+}
+
+.justifyCenter{
+  display: block;
+  background: url("../toolbar/toolbarAssets/Centered.png");
+  background-size: cover;
+  border: 1px solid black;
+  outline: none;
+  max-height: 100px;
+  max-width: 100px;
 }

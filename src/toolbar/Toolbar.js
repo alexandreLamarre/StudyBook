@@ -23,7 +23,7 @@ class Toolbar extends React.Component{
 
   runCustomCommand(e, tag){
     e.preventDefault();
-    
+
   }
 
   render(){
@@ -33,7 +33,6 @@ class Toolbar extends React.Component{
           <li className = "tool">
           <button
               onMouseDown = {(e) => e.preventDefault()}
-              type="button"
               data-command='justifyLeft'
               className="tool--btn"
               onClick = {(e) => this.runcommand(e,'justifyLeft')}>
@@ -42,8 +41,6 @@ class Toolbar extends React.Component{
           </li>
           <li className="tool">
 			      <button
-				    type="button"
-				    data-command='justifyCenter'
 				    className="tool--btn"
             onClick = {(e) => this.runcommand(e,'justifyCenter')}
             onMouseDown = {(e) => e.preventDefault()}>
@@ -112,15 +109,6 @@ class Toolbar extends React.Component{
             onClick = {(e) => this.runcommand(e,"insertUnorderedList")}
             onMouseDown = {(e) => e.preventDefault()}>
             insertUnorderedList
-            </button>
-          </li>
-          <li className = "tool">
-            <button
-            onMouseDown = {(e) => e.preventDefault()}
-            type = "button"
-            className = "tool--btn"
-            onClick = {(e) => this.runCustomCommand(e, "Toolbar")}>
-            Add toolbar
             </button>
           </li>
           {/*

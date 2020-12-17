@@ -2,7 +2,7 @@
   margin-top: 100px;
 }
 
-.editorcontent{
+.editorContent{
   min-height: 400px;
   margin-top: 1%;
   margin-left: 1%;
@@ -39,6 +39,7 @@
   pointer-events: stroke;
 }
 
+
 /* [^=frac] {
     display: inline-block;
     position: relative;
@@ -57,20 +58,20 @@
     display: none;
 } */
 
-.frac {
+[^=frac] {
     display: inline-block;
     position: relative;
     vertical-align: middle;
     letter-spacing: 0.001em;
     text-align: center;
 }
-.frac > span {
+[^=fractop]] {
     display: block;
     padding: 0.1em;
 }
-.frac span.bottom {
-    border-top: thin solid black;
-}
-.frac span.fracsymbol {
+[^=fracsymbol] {
     display: none;
+}
+[^=fracbottom] {
+    border-top: thin solid black;
 }
