@@ -35,7 +35,7 @@ class Editor extends React.Component{
     new_node.className = "editorcontent";
     new_node.setAttribute("contentEditable", "true");
     new_node.onclick = () => this.setID(new_node.id);
-    new_node.oninput = () => this.matchWordEvent();
+    new_node.oninput = (e) => this.matchWordEvent(e);
     console.log(new_node);
     var el = document.getElementById("editorContainer");
     el.appendChild(new_node);
@@ -101,7 +101,7 @@ class Editor extends React.Component{
     if(interpreted_match === null || exact_match === null || interpreted_match === undefined || exact_match === undefined) console.log("undefined behaviour for word match event");
     else {
       console.log("word", interpreted_match);
-      console.log("starts with space", !(isLetter(interpreted_match.charAt(0))) );
+      console.log("starts with complicated character", !(isLetter(interpreted_match.charAt(0))) );
       for(var i = 0; i < interpreted_match.length; i++){
         console.log("char:",interpreted_match[i], "unicode:", interpreted_match.charCodeAt(i));;
       }
@@ -109,7 +109,7 @@ class Editor extends React.Component{
       if(interpreted_match === "integral"){
         console.log("matched to existing command")
         document.getElementById(e.target.id).innerHTML
-      = node.innerHTML.replace("integral", '<span contentEditable = "false" id = "symbol'+ cid +'"> &#8747; <div id = "formula'+ this.state.fid.toString()+ + cid + '" contentEditable = "true"/> </span>')
+      = node.innerHTML.replace("integral", '<span contentEditable = "false" id = "symbol'+ cid +'">&#8747;<div id = "formula'+ this.state.fid.toString()+ + cid + '" contentEditable = "true"/> </span>');
       const new_fid = this.state.fid + 1;
       this.setState({fid: new_fid});
       var formulaToFocus = document.getElementById("formula" + (new_fid-1).toString()+ cid);
@@ -117,6 +117,17 @@ class Editor extends React.Component{
       formulaToFocus.addEventListener("onkeypress", this.handleFormulaKey, false);
 
       // this.setState({prevCaretPos: caretPos+1});
+      }
+      if(interpreted_match === "fraction"){
+        console.log("matched to existing command: fraction");
+        const current_fid = this.state.fid;
+
+        document.getElementById(e.target.id).innerHTML = node.innerHTML.replace("fraction", '<div class="frac"'+cid+'><span> <div contentEditable = "true" className = "formula'+current_fid.toString()+cid+'"> 1 </div></span><span class="symbol">/</span><span class="bottom"> <div contentEditable = "true" className = "formula"'+(current_fid+1).toString()+cid+'> 2 </div></span></div>');
+        const new_fid = this.state.fid + 2;
+        this.setState({fid: new_fid});
+        var formulaToFocus = document.getElementById("formula" + (new_fid-1).toString()+ cid);
+        // var formulaToFocus = document.getElementById("formula" + (new_fid-2).toString()+ cid);
+        // formulaToFocus.focus();
       }
     };
   }
@@ -182,6 +193,15 @@ class Editor extends React.Component{
           <option value = "indefinite integral"> &#8747; </option>
           <option value = "definite integral"> &#8747; &sub3 &sup; &#78; </option>
         </datalist>
+
+        <br></br>
+
+        <div class="frac">
+            <span>1</span>
+            <span class="fracsymbol">/</span>
+            <span class="bottom">2</span>
+
+        </div>
 
       </div>
     )
