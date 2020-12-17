@@ -1,5 +1,23 @@
+.dynamicSuggestions{
+  position:fixed;
+}
+
 .suggestionsEL{
-  width: 100px;
+  min-width: 100px;
   background-color: lightgrey;
   outline: 1px black solid;
+}
+
+.fraction, .top, .bottom {
+    padding: 0 5px;
+}
+
+.fraction {
+    display: inline-block;
+    text-align: center;
+}
+
+.bottom{
+    border-top: 1px solid #000;
+    display: block;
 }

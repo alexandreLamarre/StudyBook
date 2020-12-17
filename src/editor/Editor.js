@@ -56,10 +56,11 @@ class Editor extends React.Component{
     var sel = document.getSelection();
     console.log("collapsed?", sel.isCollapsed);
     console.log("focusOffset:",sel.focusOffset);
-
-    var el = document.getElementById(id);
-    el.focus();
-    this.setState({current_id: this.findElementId(id)});
+    if(id){
+      var el = document.getElementById(id);
+      el.focus();
+      this.setState({current_id: this.findElementId(id)});
+    }
   }
 
 
@@ -110,9 +111,11 @@ class Editor extends React.Component{
     var cur_word = this.getCurrentWord(range.startOffset, cur_node.innerText);
     console.log("detected-current-word:", cur_word )
 
-    removeElement("suggestions");
-    if(cur_word != "" || cur_word != " "){
-      this.suggestions.current.setState({active:true, input: cur_word});
+    // removeElement("suggestions");
+    if(cur_word !== "" || cur_word !== " "){
+      var pos = this.getSuggestionPosition(range);
+      console.log("suggestions position should be", pos);
+      this.suggestions.current.setState({active:true, input: cur_word, height: pos.y, width: pos.x});
       // console.log("matched to command");
       // var suggestions_node = document.createElement("div");
       // suggestions_node.classname = "suggestions";
@@ -132,12 +135,48 @@ class Editor extends React.Component{
     console.log("finding last word in current selection");
     console.log("text found", text);
     for(var i = search_index-1; i >= 0; i--){
-      console.log("char at i", text[i]);
-      if(text[i] === " " || text[i] === "&nbsp"){
+      console.log("unicode", text.charCodeAt(i), text[i])
+      if(text[i] === " " || text[i] === "&nbsp" || text[i] === "\n"){
+
         return text.slice(i+1,search_index);
       }
     }
     return text;
+  }
+
+  getSuggestionPosition(range){
+    var temp_div = document.createElement("div");
+    temp_div.id = "temp";
+    range.insertNode(temp_div);
+
+    var pos =  this.getPosition(temp_div);
+    removeElement(temp_div);
+    return pos;
+
+  }
+
+  getPosition(el){
+    var xPos = 0;
+    var yPos = 0;
+    while (el) {
+      if (el.tagName == "BODY") {
+        // deal with browser quirks with body/window/document and page scroll
+        var xScroll = el.scrollLeft || document.documentElement.scrollLeft;
+        var yScroll = el.scrollTop || document.documentElement.scrollTop;
+
+        xPos += (el.offsetLeft - xScroll + el.clientLeft);
+        yPos += (el.offsetTop - yScroll + el.clientTop);
+      } else {
+        // for all other non-BODY elements
+        xPos += (el.offsetLeft - el.scrollLeft + el.clientLeft);
+        yPos += (el.offsetTop - el.scrollTop + el.clientTop);
+      }
+      el = el.offsetParent;
+    }
+    return {
+      x: xPos,
+      y: yPos
+    };
   }
 // ========================= END EDITOR BEHAVIOUR =====================
 
@@ -259,15 +298,16 @@ class Editor extends React.Component{
 
 
         <div
-        className = "editorContainer"
-        id = "editorContainer">
-            <div className = "editorContent"
-            id = {"editorContent_"+this.state.initial_id}
-            contentEditable='true'
-            onClick = {(e) => this.setID(e.target.id)}
-            onInput = {(e) => this.editorEvent(e)}
-            onKeyDown = {(e) => this.checkEditorKey(e)}>
-            </div>
+          className = "editorContainer"
+          id = "editorContainer">
+              <div className = "editorContent"
+              id = {"editorContent_"+this.state.initial_id}
+              contentEditable='true'
+              onClick = {(e) => this.setID(e.target.id)}
+              onInput = {(e) => this.editorEvent(e)}
+              onKeyDown = {(e) => this.checkEditorKey(e)}>
+              </div>
+        <Suggestions ref = {this.suggestions}/>
         </div>
 
         <button
@@ -284,7 +324,6 @@ class Editor extends React.Component{
         </button>
 
         <br></br>
-        <Suggestions ref = {this.suggestions}/>
 
 
       </div>

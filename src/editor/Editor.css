@@ -19,6 +19,9 @@
   margin-bottom: 5%;
 }
 
+#temp{
+  display: inline-block;
+}
 
 .suggestions{
   position:absolute;
