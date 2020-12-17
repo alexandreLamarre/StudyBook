@@ -20,12 +20,9 @@ class Suggestions extends React.Component{
   render(){
     return(
       <div className = "dynamicSuggestions" hidden = {!this.state.active} style={{top:this.state.height, left:this.state.width}}>
-        <span className = "suggestionsEL" hidden = {!(this.matchAlgorithm(this.state.input, "integral"))}>&#8747;</span>
-        <br></br>
-        <span className = "suggestionsEL" hidden = {!(this.matchAlgorithm(this.state.input, "integral"))}>&#8747;<sup>n</sup><sub>i = 1</sub></span>
-        <br></br>
-        <span className = "suggestionsEL" hidden = {!(this.matchAlgorithm(this.state.input, "fraction"))}><div class="fraction"><span class="top">a</span><span class="bottom">b</span></div>
-        </span>
+        <div className = "suggestionsEL" style={{display: !(this.matchAlgorithm(this.state.input, "integral"))? "none": "block"}}>&#8747;</div>
+        <div className = "suggestionsEL" style={{display: !(this.matchAlgorithm(this.state.input, "integral"))? "none": "block"}}>&#8747;<sup>n</sup><sub>i = 1</sub></div>
+        <div className = "suggestionsEL" style={{display: !(this.matchAlgorithm(this.state.input, "fraction"))? "none": "block"}}><span class="top">a</span><div className = "fracbar"></div><span class="bottom">b</span></div>
       </div>
     )
   }

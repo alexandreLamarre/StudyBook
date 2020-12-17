@@ -83,9 +83,18 @@ class Editor extends React.Component{
     console.log(e.keyCode);
     // arrow keys should update caret positions and suggestions/commands
     console.log("key down");
-    if(e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 37 || e.keyCode === 39){
+    if(e.keyCode === 37 || e.keyCode === 39){
       console.log("arrow keys pressed");
       this.editorEvent(e); //#TODO:bugged doesnt update selection properly;
+    }
+    if(e.keyCode === 38 || e.keyCode === 40){
+      //SCROLL THROUGH SUGGESTIONS
+      if(this.suggestions.current.state.active){
+        e.preventDefault();
+      }
+      else{
+        this.editorEvent();
+      }
     }
   }
 
@@ -113,7 +122,7 @@ class Editor extends React.Component{
 
     // removeElement("suggestions");
     if(cur_word !== "" || cur_word !== " "){
-      var pos = this.getSuggestionPosition(range);
+      var pos = this.getSuggestionPosition(range, cur_word);
       console.log("suggestions position should be", pos);
       this.suggestions.current.setState({active:true, input: cur_word, height: pos.y, width: pos.x});
       // console.log("matched to command");
@@ -127,15 +136,13 @@ class Editor extends React.Component{
     else{
       this.suggestions.current.setState({active:false});
     }
-
-
   }
 
   getCurrentWord(search_index, text){
     console.log("finding last word in current selection");
     console.log("text found", text);
     for(var i = search_index-1; i >= 0; i--){
-      console.log("unicode", text.charCodeAt(i), text[i])
+      // console.log("unicode", text.charCodeAt(i), text[i])
       if(text[i] === " " || text[i] === "&nbsp" || text[i] === "\n"){
 
         return text.slice(i+1,search_index);
@@ -144,13 +151,23 @@ class Editor extends React.Component{
     return text;
   }
 
-  getSuggestionPosition(range){
+  getSuggestionPosition(range, cur_word){
     var temp_div = document.createElement("div");
     temp_div.id = "temp";
     range.insertNode(temp_div);
 
     var pos =  this.getPosition(temp_div);
-    removeElement(temp_div);
+    removeElement("temp");
+
+    var el = document.getElementById('editorContent_'+this.state.current_id);
+    var style = window.getComputedStyle(el, null).getPropertyValue('font-size');
+    var fontSize = parseFloat(style);
+
+    var size = getTextWidth(cur_word, fontSize); //this function accounts for all fonts, BUT WE ARENT ABLE CURRENTLY TO SPECIFY THE FONTS
+
+    console.log("==== calculated size", size, "=====================")
+    pos.x = pos.x - size*1.5;
+    pos.y = pos.y + 8;
     return pos;
 
   }
@@ -159,7 +176,7 @@ class Editor extends React.Component{
     var xPos = 0;
     var yPos = 0;
     while (el) {
-      if (el.tagName == "BODY") {
+      if (el.tagName === "BODY") {
         // deal with browser quirks with body/window/document and page scroll
         var xScroll = el.scrollLeft || document.documentElement.scrollLeft;
         var yScroll = el.scrollTop || document.documentElement.scrollTop;
@@ -343,4 +360,21 @@ function removeElement(id){
   if(elem === null) return;
   console.log("removal element's parent", elem.parentNode);
   return elem.parentNode.removeChild(elem);
+}
+
+/**
+ * Uses canvas.measureText to compute and return the width of the given text of given font in pixels.
+ *
+ * @param {String} text The text to be rendered.
+ * @param {String} font The css font descriptor that text is to be rendered with (e.g. "bold 14px verdana").
+ *
+ * @see https://stackoverflow.com/questions/118241/calculate-text-width-with-javascript/21015393#21015393
+ */
+function getTextWidth(text, font) {
+    // re-use canvas object for better performance
+    var canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
+    var context = canvas.getContext("2d");
+    context.font = font;
+    var metrics = context.measureText(text);
+    return metrics.width;
 }

@@ -3,9 +3,10 @@
 }
 
 .suggestionsEL{
-  min-width: 100px;
+  min-width:50px;
   background-color: lightgrey;
   outline: 1px black solid;
+  margin-top: 1px;
 }
 
 .fraction, .top, .bottom {
@@ -17,7 +18,16 @@
     text-align: center;
 }
 
+.fracbar{
+  border-bottom: 1px solid #000;
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  top:50%;
+  bottom: 50%;
+}
+
+
 .bottom{
-    border-top: 1px solid #000;
     display: block;
 }
