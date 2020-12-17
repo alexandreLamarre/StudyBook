@@ -19,6 +19,16 @@
   margin-bottom: 5%;
 }
 
+
+.suggestions{
+  position:absolute;
+  display:block;
+  color:gray;
+}
+
+
+
+
 [id^="formula"]{
   min-width: 20px;
   pointer-events: all;

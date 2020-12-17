@@ -1,6 +1,7 @@
 import React from "react";
 import { v4 as uuidv4 } from 'uuid';
 import Toolbar from "../toolbar/Toolbar.js";
+import Suggestions from "./Suggestions.js";
 
 import "./Editor.css";
 const COMMAND_LIMIT = 50;
@@ -15,6 +16,7 @@ class Editor extends React.Component{
       fid: 0,
       prevCaretPos: 0,
     };
+    this.suggestions = React.createRef();
   }
 
   componentDidMount(){
@@ -25,7 +27,7 @@ class Editor extends React.Component{
   componentDidUpdate(){
 
   }
-
+  // ==================== CELL BEHAVIOUR ====================================
   addCell(e){
     e.preventDefault();
     var new_node = this.createCellNode();
@@ -45,6 +47,7 @@ class Editor extends React.Component{
     new_node.setAttribute("contentEditable", "true");
     new_node.onclick = () => this.setID(new_node.id);
     new_node.oninput = (e) => this.editorEvent(e);
+    new_node.onkeydown = (e) => this.checkEditorKey(e);
     return new_node;
   }
 
@@ -72,6 +75,21 @@ class Editor extends React.Component{
     return found[0].slice(1, found[0].length);
   }
 
+  // ==================== END CELL BEHAVIOUR =================================
+
+  // ========================= EDITOR BEHAVIOUR =====================
+  checkEditorKey(e){
+    console.log(e.keyCode);
+    // arrow keys should update caret positions and suggestions/commands
+    console.log("key down");
+    if(e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 37 || e.keyCode === 39){
+      console.log("arrow keys pressed");
+      this.editorEvent(e); //#TODO:bugged doesnt update selection properly;
+    }
+  }
+
+
+
   editorEvent(e){
     // Load up content
     var cur_node = document.getElementById(e.target.id);
@@ -79,15 +97,54 @@ class Editor extends React.Component{
 
     var cur_html = cur_node.outerHTML;
     console.log("current html content of node", cur_html);
-    
+
     // find currently typed/selected word
+    var sel = window.getSelection();
+    console.log("current window selection", sel);
+    console.log("current selection focusOffset", sel.focusOffset, "current selection anchorOffset", sel.anchorOffset);
+
+    // if it already exists else where in the document
+    // removeElement("suggestions");
+    var range = sel.getRangeAt(0);
+    console.log("range obtained at sel 0", range);
+    var cur_word = this.getCurrentWord(range.startOffset, cur_node.innerText);
+    console.log("detected-current-word:", cur_word )
+
+    removeElement("suggestions");
+    if(cur_word != "" || cur_word != " "){
+      this.suggestions.current.setState({active:true, input: cur_word});
+      // console.log("matched to command");
+      // var suggestions_node = document.createElement("div");
+      // suggestions_node.classname = "suggestions";
+      // suggestions_node.id = "suggestions";
+      // suggestions_node.innerHTML = "test match";
+      // suggestions_node.contentEditable = "false";
+      // cur_node.appendChild(suggestions_node);
+    }
+    else{
+      this.suggestions.current.setState({active:false});
+    }
 
 
+  }
+
+  getCurrentWord(search_index, text){
+    console.log("finding last word in current selection");
+    console.log("text found", text);
+    for(var i = search_index-1; i >= 0; i--){
+      console.log("char at i", text[i]);
+      if(text[i] === " " || text[i] === "&nbsp"){
+        return text.slice(i+1,search_index);
+      }
+    }
+    return text;
+  }
+// ========================= END EDITOR BEHAVIOUR =====================
 
 
     // end find currently typed/selected word
 
-  }
+
   // handleKeyDown(e){
   //   // update keys
   //   if(e.keyCode === 16) this.setState({deleteCellKeys: {16:true,
@@ -208,7 +265,8 @@ class Editor extends React.Component{
             id = {"editorContent_"+this.state.initial_id}
             contentEditable='true'
             onClick = {(e) => this.setID(e.target.id)}
-            onInput = {(e) => this.editorEvent(e)}>
+            onInput = {(e) => this.editorEvent(e)}
+            onKeyDown = {(e) => this.checkEditorKey(e)}>
             </div>
         </div>
 
@@ -224,13 +282,9 @@ class Editor extends React.Component{
         >
           Math Keyboard
         </button>
-        <input type = "text" list = "commands"/>
-        <datalist id = "commands">
-          <option value = "indefinite integral"> &#8747; </option>
-          <option value = "definite integral"> &#8747; &sub3 &sup; &#78; </option>
-        </datalist>
 
         <br></br>
+        <Suggestions ref = {this.suggestions}/>
 
 
       </div>
@@ -242,4 +296,12 @@ export default Editor;
 
 function isLetter(str) {
   return str.length === 1 && str.match(/[a-z]/i);
+}
+
+function removeElement(id){
+  var elem = document.getElementById(id);
+  console.log("remove element", elem);
+  if(elem === null) return;
+  console.log("removal element's parent", elem.parentNode);
+  return elem.parentNode.removeChild(elem);
 }
