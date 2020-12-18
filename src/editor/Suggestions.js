@@ -26,23 +26,29 @@ class Suggestions extends React.Component{
     return string.startsWith(input) && input !== "";
   }
 
-  createMathElement(name){
+  createMathElement(e){
+    e.preventDefault();
+    var name = e.target.id;
     var cur_id = this.parent.state.current_id;
     console.log("inserting into id", cur_id);
     const replace_str = this.state.input;
     console.log("replacing '", replace_str,"' with...", name);
     const [symbol, focus_id] =  mathRenderedElement(name, this.parent.findElementId(cur_id));
     console.log("should become ", symbol);
-    var node = document.getElementById(cur_id);
-    var new_inner_html = node.innerHTML;
-    new_inner_html = new_inner_html.replace(replace_str, symbol);
-    node.innerHTML = new_inner_html;
-    this.parent.setState({
-      current_id: focus_id,
-      extraElements: this.parent.state.extraElements+2});
+    this.parent.insertMathSymbol(symbol);
     var focus_node = document.getElementById(focus_id);
-    focus_node.focus();
-    this.setState({active: false})
+    if(focus_node) focus_node.focus();
+    this.setState({active: false});
+    // var node = document.getElementById(cur_id);
+    // var new_inner_html = node.innerHTML;
+    // new_inner_html = new_inner_html.replace(replace_str, symbol);
+    // node.innerHTML = new_inner_html;
+    // this.parent.setState({
+    //   current_id: focus_id,
+    //   extraElements: this.parent.state.extraElements+2});
+    // var focus_node = document.getElementById(focus_id);
+    // focus_node.focus();
+    // this.setState({active: false})
 
 
     // new_text.replace(replace_str, mathRenderedElement(replace_str))
@@ -51,11 +57,12 @@ class Suggestions extends React.Component{
 
   render(){
     return(
-      <div id = "dynamicSuggestions" className = "dynamicSuggestions" hidden = {!this.state.active} style={{top:this.state.height, left:this.state.width}}>
+      <div
+       id = "dynamicSuggestions" className = "dynamicSuggestions" hidden = {!this.state.active} style={{top:this.state.height, left:this.state.width}}>
         <div id= "indefinite integral"
         className = "suggestionsEL"
         style={{display: !(this.matchAlgorithm(this.state.input, "integral"))? "none": "block"}}
-        onClick = {(e) => this.createMathElement(e.target.id)}>
+        onClick = {(e) => this.createMathElement(e)}>
           &#8747;
         </div>
 
@@ -64,7 +71,7 @@ class Suggestions extends React.Component{
         </div>
 
         <div className = "suggestionsEL" style={{display: !(this.matchAlgorithm(this.state.input, "fraction"))? "none": "block"}}>
-          <div className = "fraction"><span class="top">a</span><div className = "fracbar"></div><span class="bottom">b</span></div>
+          <span className = "fraction"><span class="top">a</span><div className = "fracbar"></div><span class="bottom">b</span></span>
         </div>
 
         <div className = "suggestionsEL" style={{display: !(this.matchAlgorithm(this.state.input, "function"))? "none": "block"}}>

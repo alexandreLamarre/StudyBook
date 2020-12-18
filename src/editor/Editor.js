@@ -52,7 +52,8 @@ class Editor extends React.Component{
     return new_node;
   }
 
-  setID(id){
+  setID(e){
+    var id = e.target.id;
     console.log("element id:",id);
     var sel = document.getSelection();
     console.log("collapsed?", sel.isCollapsed);
@@ -61,6 +62,8 @@ class Editor extends React.Component{
       var el = document.getElementById(id);
       el.focus();
       this.setState({current_id: id});
+      // clearTheSelection();
+      this.editorEvent(e);
     }
   }
 
@@ -100,6 +103,8 @@ class Editor extends React.Component{
 
 
 
+
+
   editorEvent(e){
     // ================== Load current cell ====================================
     var cur_node = document.getElementById(e.target.id);
@@ -110,11 +115,13 @@ class Editor extends React.Component{
     // ================= find currently typed/selected word =======================
     var sel = window.getSelection();
     // console.log("current window selection", sel);
-    // console.log("current selection focusOffset", sel.focusOffset, "current selection anchorOffset", sel.anchorOffset);
+    console.log("current selection focusOffset", sel.focusOffset, "current selection anchorOffset", sel.anchorOffset);
     console.log("selection range count", sel.rangeCount);
     var range = sel.getRangeAt(0);
     // console.log("range obtained at sel 0", range);
-    var cur_word = this.getCurrentWord(range.startOffset+this.state.extraElements, cur_node.innerText);
+
+    var position = (cur_node.parentNode.id).startsWith("editorContainer")? sel.anchorOffset: sel.focusOffset;
+    var cur_word = this.getCurrentWord(position, cur_node.innerText);
     console.log("detected-current-word:", cur_word )
 
     // ================= proccess selections ======================
@@ -139,7 +146,7 @@ class Editor extends React.Component{
         return text.slice(i+1,search_index);
       }
     }
-    return text;
+    return text.slice(0, search_index);
   }
 
   getSuggestionPosition(range, cur_word){
@@ -151,11 +158,12 @@ class Editor extends React.Component{
     removeElement("temp");
 
     var el = document.getElementById(this.state.current_id);
-    var style = window.getComputedStyle(el, null).getPropertyValue('font-size');
-    var fontSize = parseFloat(style);
+    if(el != null){
+      var style = window.getComputedStyle(el, null).getPropertyValue('font-size');
+      var fontSize = parseFloat(style);
 
-    var size = getTextWidth(cur_word, fontSize); //this function accounts for all fonts, BUT WE ARENT ABLE CURRENTLY TO SPECIFY THE FONTS
-
+      var size = getTextWidth(cur_word, fontSize); //this function accounts for all fonts, BUT WE ARENT ABLE CURRENTLY TO SPECIFY THE FONTS
+    }
     // console.log("==== calculated size", size, "=====================")
     pos.x = pos.x - size*1.5;
     pos.y = pos.y + 8;
@@ -185,6 +193,10 @@ class Editor extends React.Component{
       x: xPos,
       y: yPos
     };
+  }
+
+  insertMathSymbol(text_node){
+    insertHtmlAfterSelection(text_node);
   }
 // ========================= END EDITOR BEHAVIOUR =====================
 
@@ -309,7 +321,7 @@ class Editor extends React.Component{
               <div className = "editorContent"
               id = {"editorContent_"+this.state.initial_id}
               contentEditable='true'
-              onClick = {(e) => this.setID(e.target.id)}
+              onClick = {(e) => this.setID(e)}
               onInput = {(e) => this.editorEvent(e)}
               onKeyDown = {(e) => this.checkEditorKey(e)}>
               </div>
@@ -366,4 +378,52 @@ function getTextWidth(text, font) {
     context.font = font;
     var metrics = context.measureText(text);
     return metrics.width;
+}
+
+function insertHtmlAfterSelection(html) {
+    var sel, range, expandedSelRange, node;
+    if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+            range = window.getSelection().getRangeAt(0);
+            expandedSelRange = range.cloneRange();
+            range.collapse(false);
+
+            // Range.createContextualFragment() would be useful here but is
+            // non-standard and not supported in all browsers (IE9, for one)
+            var el = document.createElement("div");
+            el.innerHTML = html;
+            var frag = document.createDocumentFragment(), node, lastNode;
+            while ( (node = el.firstChild) ) {
+                lastNode = frag.appendChild(node);
+            }
+            range.insertNode(frag);
+
+            // Preserve the selection
+            if (lastNode) {
+                expandedSelRange.setEndAfter(lastNode);
+                sel.removeAllRanges();
+                sel.addRange(expandedSelRange);
+            }
+        }
+    } else if (document.selection && document.selection.createRange) {
+        range = document.selection.createRange();
+        expandedSelRange = range.duplicate();
+        range.collapse(false);
+        range.pasteHTML(html);
+        expandedSelRange.setEndPoint("EndToEnd", range);
+        expandedSelRange.select();
+    }
+}
+
+function clearTheSelection() {
+    if (window.getSelection) {
+      if (window.getSelection().empty) {  // Chrome
+        window.getSelection().empty();
+      } else if (window.getSelection().removeAllRanges) {  // Firefox
+        window.getSelection().removeAllRanges();
+      }
+    } else if (document.selection) {  // IE?
+      document.selection.empty();
+    }
 }
