@@ -15,6 +15,7 @@ class Editor extends React.Component{
       current_id : 0,
       fid: 0,
       prevCaretPos: 0,
+      extraElements: 0,
     };
     this.suggestions = React.createRef();
   }
@@ -59,7 +60,7 @@ class Editor extends React.Component{
     if(id){
       var el = document.getElementById(id);
       el.focus();
-      this.setState({current_id: this.findElementId(id)});
+      this.setState({current_id: id});
     }
   }
 
@@ -80,12 +81,10 @@ class Editor extends React.Component{
 
   // ========================= EDITOR BEHAVIOUR =====================
   checkEditorKey(e){
-    console.log(e.keyCode);
     // arrow keys should update caret positions and suggestions/commands
-    console.log("key down");
     if(e.keyCode === 37 || e.keyCode === 39){
-      console.log("arrow keys pressed");
-      this.editorEvent(e); //#TODO:bugged doesnt update selection properly;
+      //#TODO: ARROW KEY EVENTS ARE HELLA BUGGED
+      // this.editorEvent(e); //#TODO:bugged doesnt update selection properly;
     }
     if(e.keyCode === 38 || e.keyCode === 40){
       //SCROLL THROUGH SUGGESTIONS
@@ -93,7 +92,8 @@ class Editor extends React.Component{
         e.preventDefault();
       }
       else{
-        this.editorEvent();
+        //#TODO: ARROW KEY EVENTS ARE HELLA BUGGED
+        // this.editorEvent(); //bugged doesnt update selection properly
       }
     }
   }
@@ -101,37 +101,27 @@ class Editor extends React.Component{
 
 
   editorEvent(e){
-    // Load up content
+    // ================== Load current cell ====================================
     var cur_node = document.getElementById(e.target.id);
-    console.log("current input node:", cur_node);
-
+    // console.log("current input node:", cur_node);
     var cur_html = cur_node.outerHTML;
-    console.log("current html content of node", cur_html);
+    // console.log("current html content of node", cur_html);
 
-    // find currently typed/selected word
+    // ================= find currently typed/selected word =======================
     var sel = window.getSelection();
-    console.log("current window selection", sel);
-    console.log("current selection focusOffset", sel.focusOffset, "current selection anchorOffset", sel.anchorOffset);
-
-    // if it already exists else where in the document
-    // removeElement("suggestions");
+    // console.log("current window selection", sel);
+    // console.log("current selection focusOffset", sel.focusOffset, "current selection anchorOffset", sel.anchorOffset);
+    console.log("selection range count", sel.rangeCount);
     var range = sel.getRangeAt(0);
-    console.log("range obtained at sel 0", range);
-    var cur_word = this.getCurrentWord(range.startOffset, cur_node.innerText);
+    // console.log("range obtained at sel 0", range);
+    var cur_word = this.getCurrentWord(range.startOffset+this.state.extraElements, cur_node.innerText);
     console.log("detected-current-word:", cur_word )
 
-    // removeElement("suggestions");
+    // ================= proccess selections ======================
     if(cur_word !== "" || cur_word !== " "){
       var pos = this.getSuggestionPosition(range, cur_word);
-      console.log("suggestions position should be", pos);
+      // console.log("suggestions position should be", pos);
       this.suggestions.current.setState({active:true, input: cur_word, height: pos.y, width: pos.x});
-      // console.log("matched to command");
-      // var suggestions_node = document.createElement("div");
-      // suggestions_node.classname = "suggestions";
-      // suggestions_node.id = "suggestions";
-      // suggestions_node.innerHTML = "test match";
-      // suggestions_node.contentEditable = "false";
-      // cur_node.appendChild(suggestions_node);
     }
     else{
       this.suggestions.current.setState({active:false});
@@ -139,8 +129,9 @@ class Editor extends React.Component{
   }
 
   getCurrentWord(search_index, text){
-    console.log("finding last word in current selection");
-    console.log("text found", text);
+    console.log(text)
+    console.log(text.replace(new RegExp("<{1}(.)*<{1}/{1}(.)*>{1}"), ""));
+    console.log("finding last word in current selection ==== ", text);
     for(var i = search_index-1; i >= 0; i--){
       // console.log("unicode", text.charCodeAt(i), text[i])
       if(text[i] === " " || text[i] === "&nbsp" || text[i] === "\n"){
@@ -159,13 +150,13 @@ class Editor extends React.Component{
     var pos =  this.getPosition(temp_div);
     removeElement("temp");
 
-    var el = document.getElementById('editorContent_'+this.state.current_id);
+    var el = document.getElementById(this.state.current_id);
     var style = window.getComputedStyle(el, null).getPropertyValue('font-size');
     var fontSize = parseFloat(style);
 
     var size = getTextWidth(cur_word, fontSize); //this function accounts for all fonts, BUT WE ARENT ABLE CURRENTLY TO SPECIFY THE FONTS
 
-    console.log("==== calculated size", size, "=====================")
+    // console.log("==== calculated size", size, "=====================")
     pos.x = pos.x - size*1.5;
     pos.y = pos.y + 8;
     return pos;
@@ -312,8 +303,6 @@ class Editor extends React.Component{
     return (
       <div>
         <Toolbar />
-
-
         <div
           className = "editorContainer"
           id = "editorContainer">
@@ -324,7 +313,7 @@ class Editor extends React.Component{
               onInput = {(e) => this.editorEvent(e)}
               onKeyDown = {(e) => this.checkEditorKey(e)}>
               </div>
-        <Suggestions ref = {this.suggestions}/>
+        <Suggestions parent = {this} ref = {this.suggestions}/>
         </div>
 
         <button
@@ -356,9 +345,9 @@ function isLetter(str) {
 
 function removeElement(id){
   var elem = document.getElementById(id);
-  console.log("remove element", elem);
+  // console.log("remove element", elem);
   if(elem === null) return;
-  console.log("removal element's parent", elem.parentNode);
+  // console.log("removal element's parent", elem.parentNode);
   return elem.parentNode.removeChild(elem);
 }
 

@@ -7,6 +7,10 @@
   background-color: lightgrey;
   outline: 1px black solid;
   margin-top: 1px;
+  padding-right: 10px;
+  padding-left: 10px;
+  padding-top: 5px;
+  padding-bottom:5px;
 }
 
 .fraction, .top, .bottom {
@@ -18,7 +22,7 @@
     text-align: center;
 }
 
-.fracbar{
+.fraction .fracbar{
   border-bottom: 1px solid #000;
   position: absolute;
   left: 20%;
@@ -30,4 +34,23 @@
 
 .bottom{
     display: block;
+}
+
+.supsub {position: absolute}
+.subscript {display:block; position:relative; left:1px; top: -5px}
+.superscript {display:block; position:relative; left:1px; top: -5px}
+
+
+[id^="formula"]{
+  min-width: 20px;
+  pointer-events: all;
+  font-style: italic;
+  border-style: none;
+  outline: none;
+  width: auto;
+  display: inline-block;
+}
+
+[id^="formula"]:focus{
+  border-style: dotted;
 }
